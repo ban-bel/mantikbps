@@ -8,7 +8,7 @@
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="{{ asset('css/sidebar.css') }}?v=20260630" rel="stylesheet">
+    <link href="{{ asset('css/sidebar.css') }}?v=20261122-centered" rel="stylesheet">
 
     <style>
         body {
@@ -109,6 +109,25 @@
                     <span class="link-text">Publikasi Selesai Dikelola</span>
                 </a>
 
+
+
+                @php
+                    $hasOpenPlanningPeriod = \App\Models\ReleasePlanningPeriod::where('tenant_id', auth()->user()->tenant_id)
+                        ->where('is_open', true)
+                        ->exists();
+                @endphp
+
+                @if($hasOpenPlanningPeriod)
+                    <span class="nav-section-label">Perencanaan Rilis</span>
+
+                    <a href="{{ route('employee.schedule-proposals.index') }}"
+                       class="nav-link {{ request()->routeIs('employee.schedule-proposals.*') ? 'active' : '' }}"
+                       title="Usulan Jadwal Rilis T+1">
+                        <i class="bi bi-calendar2-week"></i>
+                        <span class="link-text">Usulan Jadwal Rilis T+1</span>
+                    </a>
+                @endif
+
                 <span class="nav-section-label">Tugas Saya</span>
 
                 <a href="{{ route('employee.tasks.index') }}"
@@ -152,6 +171,8 @@
                     <i class="bi bi-globe2"></i>
                     <span class="link-text">Operator Website</span>
                 </a>
+
+
             </nav>
         </div>
     </aside>

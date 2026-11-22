@@ -12,6 +12,7 @@ class Publication extends Model
 
     protected $fillable = [
         'tenant_id',
+        'source_publication_id',
         'created_by',
         'nomor',
         'nama_publikasi',
@@ -29,6 +30,10 @@ class Publication extends Model
         'jenis_publikasi',
         'deskripsi_singkat',
         'status',
+        'planning_status',
+        'cancellation_reason',
+        'finalized_by',
+        'finalized_at',
         'revision_return_stage',
         'tanggal_rilis_aktual',
         'draft_submitted_at',
@@ -60,6 +65,7 @@ class Publication extends Model
         'leadership_approved_at' => 'datetime',
         'website_packaged_at' => 'datetime',
         'ready_for_release_at' => 'datetime',
+        'finalized_at' => 'datetime',
     ];
 
     public function tenant()
@@ -67,9 +73,24 @@ class Publication extends Model
         return $this->belongsTo(Tenant::class);
     }
 
+    public function sourcePublication()
+    {
+        return $this->belongsTo(Publication::class, 'source_publication_id');
+    }
+
+    public function derivedPublications()
+    {
+        return $this->hasMany(Publication::class, 'source_publication_id');
+    }
+
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function finalizer()
+    {
+        return $this->belongsTo(User::class, 'finalized_by');
     }
 
     public function team()
@@ -80,6 +101,25 @@ class Publication extends Model
     public function teamAssignments()
     {
         return $this->hasMany(PublicationTeamAssignment::class);
+    }
+
+    public function scheduleProposals()
+    {
+        return $this->hasMany(PublicationScheduleProposal::class);
+    }
+
+    public function scheduleReschedules()
+    {
+        return $this->hasMany(PublicationScheduleReschedule::class);
+    }
+
+    /**
+     * Apakah publikasi ini pernah mengalami perubahan jadwal resmi.
+     * Digunakan untuk menampilkan badge "Riwayat Reschedule" di tabel progres.
+     */
+    public function getHasRescheduleAttribute(): bool
+    {
+        return $this->scheduleReschedules()->exists();
     }
 
     public function teamAssignmentHistories()

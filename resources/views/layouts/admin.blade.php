@@ -8,7 +8,7 @@
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="{{ asset('css/sidebar.css') }}?v=20260630" rel="stylesheet">
+    <link href="{{ asset('css/sidebar.css') }}?v=20261122-centered" rel="stylesheet">
 
     <style>
         body {

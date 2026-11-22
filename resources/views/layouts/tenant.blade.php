@@ -8,7 +8,7 @@
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="{{ asset('css/sidebar.css') }}?v=20260630" rel="stylesheet">
+    <link href="{{ asset('css/sidebar.css') }}?v=20261122-centered" rel="stylesheet">
 
     <style>
         body {
@@ -294,7 +294,7 @@
 
         <div class="nav-wrapper">
             <nav class="nav flex-column">
-                <span class="nav-section-label">Manajemen</span>
+                <span class="nav-section-label">Menu Utama</span>
 
                 <a href="{{ route('tenant.dashboard') }}"
                    class="nav-link {{ request()->routeIs('tenant.dashboard') ? 'active' : '' }}"
@@ -302,6 +302,24 @@
                     <i class="bi bi-speedometer2"></i>
                     <span class="link-text">Dashboard</span>
                 </a>
+
+                <span class="nav-section-label">Perencanaan Rilis</span>
+
+                <a href="{{ route('tenant.release-planning.index') }}"
+                   class="nav-link {{ request()->routeIs('tenant.release-planning.*') ? 'active' : '' }}"
+                   title="Perencanaan Rilis T+1">
+                    <i class="bi bi-calendar2-range"></i>
+                    <span class="link-text">Perencanaan Rilis T+1</span>
+                </a>
+
+                <a href="{{ route('tenant.holidays.index') }}"
+                   class="nav-link {{ request()->routeIs('tenant.holidays.*') ? 'active' : '' }}"
+                   title="Kalender Hari Libur">
+                    <i class="bi bi-calendar-event"></i>
+                    <span class="link-text">Kalender Hari Libur</span>
+                </a>
+
+                <span class="nav-section-label">Manajemen Publikasi</span>
 
                 <a href="{{ route('tenant.publications.index') }}"
                    class="nav-link {{ request()->routeIs('tenant.publications.*') ? 'active' : '' }}"

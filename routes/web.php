@@ -7,6 +7,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Employee\DocumentReviewController;
 use App\Http\Controllers\Employee\EmployeeDashboardController;
 use App\Http\Controllers\Employee\EmployeeTaskController;
+use App\Http\Controllers\Employee\ScheduleProposalController;
 use App\Http\Controllers\Leader\LeaderApprovalController;
 use App\Http\Controllers\Leader\LeaderDashboardController;
 use App\Http\Controllers\Tenant\InspectionGuidelineController;
@@ -17,6 +18,9 @@ use App\Http\Controllers\Tenant\KnowledgeController;
 use App\Http\Controllers\Tenant\MonitoringController;
 use App\Http\Controllers\Tenant\PublicationProgressController;
 use App\Http\Controllers\Tenant\PublicationController;
+use App\Http\Controllers\Tenant\TenantHolidayController;
+use App\Http\Controllers\Tenant\ReleasePlanningPeriodController;
+use App\Http\Controllers\Tenant\ScheduleRescheduleController;
 use App\Http\Controllers\Tenant\TeamAllocationController;
 use App\Http\Controllers\Tenant\TeamTemplateController;
 use App\Http\Controllers\Tenant\TenantDashboardController;
@@ -105,6 +109,13 @@ Route::prefix('tenant')
             ])
             ->names('publications');
 
+        Route::post('/publikasi/{publication}/reschedule', [ScheduleRescheduleController::class, 'store'])
+            ->name('publications.reschedule.store');
+        Route::get('/publikasi/reschedule/{reschedule}/download-surat', [ScheduleRescheduleController::class, 'downloadLetter'])
+            ->name('publications.reschedule.download-letter');
+        Route::get('/publikasi/{publication}/reschedule/draf-surat', [ScheduleRescheduleController::class, 'draftSurat'])
+            ->name('publications.reschedule.draft-surat');
+
         Route::get('/akun-pengguna/export', [UserAccountController::class, 'export'])
             ->name('user-accounts.export');
 
@@ -114,6 +125,11 @@ Route::prefix('tenant')
             ])
             ->names('user-accounts')
             ->except(['show']);
+
+        Route::get('/alokasi-tim', function (\Illuminate\Http\Request $request) {
+            $queryString = $request->getQueryString();
+            return redirect('/tenant/tim-kerja' . ($queryString ? '?' . $queryString : ''));
+        });
 
         Route::get('/tim-kerja', [TeamAllocationController::class, 'index'])
             ->name('team-allocations.index');
@@ -259,6 +275,33 @@ Route::prefix('tenant')
 
         Route::get('/monitoring-kabkota', [MonitoringController::class, 'index'])
             ->name('monitoring.index');
+
+        // ── Perencanaan Rilis T+1 & Kalender Libur ──
+        Route::get('/kalender-libur', [TenantHolidayController::class, 'index'])
+            ->name('holidays.index');
+        Route::post('/kalender-libur', [TenantHolidayController::class, 'store'])
+            ->name('holidays.store');
+        Route::delete('/kalender-libur/{holiday}', [TenantHolidayController::class, 'destroy'])
+            ->name('holidays.destroy');
+        Route::post('/kalender-libur/impor-nasional', [TenantHolidayController::class, 'importNational'])
+            ->name('holidays.import-national');
+
+        Route::get('/perencanaan-rilis', [ReleasePlanningPeriodController::class, 'index'])
+            ->name('release-planning.index');
+        Route::post('/perencanaan-rilis', [ReleasePlanningPeriodController::class, 'store'])
+            ->name('release-planning.store');
+        Route::patch('/perencanaan-rilis/{period}/toggle', [ReleasePlanningPeriodController::class, 'toggle'])
+            ->name('release-planning.toggle');
+        Route::delete('/perencanaan-rilis/{period}', [ReleasePlanningPeriodController::class, 'destroy'])
+            ->name('release-planning.destroy');
+        Route::get('/perencanaan-rilis/{period}/monitoring', [ReleasePlanningPeriodController::class, 'monitoring'])
+            ->name('release-planning.monitoring');
+        Route::get('/perencanaan-rilis/roll-over', [ReleasePlanningPeriodController::class, 'rollOverView'])
+            ->name('release-planning.roll-over');
+        Route::post('/perencanaan-rilis/roll-over', [ReleasePlanningPeriodController::class, 'executeRollOver'])
+            ->name('release-planning.roll-over.execute');
+        Route::post('/perencanaan-rilis/reset-roll-over', [ReleasePlanningPeriodController::class, 'resetRollOver'])
+            ->name('release-planning.roll-over.reset');
     });
 
 Route::prefix('pegawai')
@@ -345,6 +388,24 @@ Route::prefix('pegawai')
 
         Route::delete('/tugas-saya/review-dokumen/catatan/{reviewNote}', [DocumentReviewController::class, 'destroyNote'])
             ->name('tasks.document-review.destroy-note');
+
+        // ── Perencanaan Jadwal Rilis T+1 (Usulan Pegawai & Rekonsiliasi) ──
+        Route::get('/usulan-jadwal', [ScheduleProposalController::class, 'index'])
+            ->name('schedule-proposals.index');
+        Route::post('/usulan-jadwal/hitung-otomatis', [ScheduleProposalController::class, 'calculateSchedule'])
+            ->name('schedule-proposals.calculate');
+        Route::get('/usulan-jadwal/buat-baru', [ScheduleProposalController::class, 'create'])
+            ->name('schedule-proposals.create');
+        Route::post('/usulan-jadwal/buat-baru', [ScheduleProposalController::class, 'storeNewPublication'])
+            ->name('schedule-proposals.store-new');
+        Route::get('/usulan-jadwal/{publication}', [ScheduleProposalController::class, 'show'])
+            ->name('schedule-proposals.show');
+        Route::post('/usulan-jadwal/{publication}', [ScheduleProposalController::class, 'store'])
+            ->name('schedule-proposals.store');
+        Route::get('/usulan-jadwal/{publication}/rekonsiliasi', [ScheduleProposalController::class, 'reconcile'])
+            ->name('schedule-proposals.reconcile');
+        Route::post('/usulan-jadwal/{publication}/finalisasi', [ScheduleProposalController::class, 'finalize'])
+            ->name('schedule-proposals.finalize');
     });
 
 Route::prefix('pimpinan')

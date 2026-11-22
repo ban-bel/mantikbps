@@ -32,7 +32,7 @@
     flex-direction: column;
     z-index: 1040;
     transition: width var(--sidebar-transition), transform var(--sidebar-transition);
-    overflow: hidden;
+    overflow: visible;
     border-right: 1px solid rgba(255, 255, 255, 0.05);
     box-shadow: 4px 0 24px rgba(0, 0, 0, 0.25);
 }
@@ -70,11 +70,16 @@
     transform: scale(1.05) rotate(-2deg);
 }
 
+.sidebar.collapsed .brand {
+    padding: 20px 0;
+    justify-content: center;
+}
+
 .sidebar.collapsed .logo-bps {
     width: 38px;
     height: 38px;
     padding: 5px;
-    margin-left: 2px;
+    margin: 0 auto;
 }
 
 .sidebar .brand-text {
@@ -85,6 +90,7 @@
 }
 
 .sidebar.collapsed .brand-text {
+    display: none;
     opacity: 0;
     width: 0;
     transition: opacity 0.15s ease;
@@ -145,9 +151,10 @@
 }
 
 .sidebar.collapsed .nav-section-label {
+    display: none;
     opacity: 0;
-    height: 12px;
-    padding: 6px 0;
+    height: 0;
+    padding: 0;
 }
 
 /* ─── Nav Links ─── */
@@ -184,6 +191,7 @@
 }
 
 .sidebar.collapsed .nav-link .link-text {
+    display: none;
     opacity: 0;
     width: 0;
     transition: opacity 0.1s ease;
@@ -213,10 +221,15 @@
 }
 
 /* ─── Tooltip for collapsed state ─── */
+.sidebar.collapsed .nav-wrapper {
+    padding: 16px 8px;
+}
+
 .sidebar.collapsed .nav-link {
     justify-content: center;
     padding: 11px 0;
     border-radius: 12px;
+    gap: 0;
 }
 
 .sidebar.collapsed .nav-link.active {
@@ -224,52 +237,65 @@
     border-radius: 4px 12px 12px 4px;
 }
 
+.sidebar.collapsed .nav-link i,
 .sidebar.collapsed .nav-link[data-bs-toggle="tooltip"] i {
-    margin: 0;
+    margin: 0 auto;
+    width: 24px;
+    text-align: center;
+    flex-shrink: 0;
 }
 
-/* ─── Toggle Button ─── */
+/* ─── Toggle Button (Modern Floating Edge Pattern ala Linear/Notion) ─── */
 .sidebar .btn-sidebar-toggle {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 26px;
-    height: 26px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
-    border: 1px solid rgba(255,255,255,0.1);
-    background: #1e293b;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    background: #0f172a;
     color: #94a3b8;
-    font-size: 13px;
+    font-size: 11px;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     padding: 0;
     position: absolute;
-    right: 14px;
-    top: 26px;
-    z-index: 10;
+    right: -12px;
+    top: 28px;
+    z-index: 1050;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
 }
 
 .sidebar .btn-sidebar-toggle:hover {
-    background: #334155;
-    color: #fff;
-    transform: scale(1.1);
+    background: #2563eb;
+    border-color: #3b82f6;
+    color: #ffffff;
+    transform: scale(1.15);
+    box-shadow: 0 0 12px rgba(37, 99, 235, 0.5);
 }
 
 .sidebar .btn-sidebar-toggle i {
     transition: transform var(--sidebar-transition);
+    line-height: 1;
 }
 
 .sidebar.collapsed .btn-sidebar-toggle {
-    right: 0;
-    left: 0;
-    margin: 0 auto;
-    top: 60px; /* Move below the logo when collapsed */
-    background: transparent;
-    border-color: transparent;
+    right: -12px;
+    left: auto;
+    margin: 0;
+    top: 28px;
+    background: #0f172a;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
 }
 
 .sidebar.collapsed .btn-sidebar-toggle:hover {
-    background: rgba(255,255,255,0.1);
+    background: #2563eb;
+    border-color: #3b82f6;
+    color: #ffffff;
+    transform: scale(1.15);
+    box-shadow: 0 0 12px rgba(37, 99, 235, 0.5);
 }
 
 .sidebar.collapsed .btn-sidebar-toggle i {
@@ -326,8 +352,35 @@ body.sidebar-collapsed .main-wrapper {
         transform: translateX(0);
     }
 
+    /* Sembunyikan tombol toggle panah desktop di layar mobile/tablet */
+    .sidebar .btn-sidebar-toggle {
+        display: none !important;
+    }
+
+    /* Di layar mobile/tablet, drawer selalu tampil penuh dengan teks terbaca */
     .sidebar.collapsed {
         width: var(--sidebar-width);
+    }
+
+    .sidebar.collapsed .brand-text {
+        opacity: 1 !important;
+        width: auto !important;
+    }
+
+    .sidebar.collapsed .nav-section-label {
+        opacity: 1 !important;
+        height: auto !important;
+        padding: 20px 14px 8px !important;
+    }
+
+    .sidebar.collapsed .nav-link {
+        justify-content: flex-start !important;
+        padding: 11px 16px !important;
+    }
+
+    .sidebar.collapsed .nav-link .link-text {
+        opacity: 1 !important;
+        width: auto !important;
     }
 
     .main-wrapper,

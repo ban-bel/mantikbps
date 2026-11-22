@@ -29,7 +29,7 @@ class PublicationProgressController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Publication::with(['team.assignments.user'])
+        $query = Publication::with(['team.assignments.user', 'scheduleReschedules.user'])
             ->where('tenant_id', Auth::user()->tenant_id);
 
         if ($request->filled('q')) {

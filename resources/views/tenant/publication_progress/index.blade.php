@@ -169,6 +169,19 @@
                             <tr>
                                 <td class="name-cell" title="{{ $publication->nama_publikasi }}">
                                     <div class="progress-title-text">{{ $publication->nama_publikasi }}</div>
+                                    <div class="d-flex flex-wrap align-items-center gap-1 mt-1">
+                                        <span class="badge {{ $publication->kategori === 'ARC' ? 'bg-primary' : 'bg-secondary' }}" style="font-size: 10px;">{{ $publication->kategori }}</span>
+                                        @if($publication->has_reschedule)
+                                            <button type="button" class="btn btn-link p-0 text-decoration-none" data-bs-toggle="modal" data-bs-target="#modalRescheduleHistory-{{ $publication->id }}" title="Lihat Riwayat Perubahan Jadwal">
+                                                <span class="badge bg-warning text-dark border border-warning" style="font-size: 10px;">
+                                                    <i class="bi bi-clock-history me-1"></i>Reschedule ({{ $publication->scheduleReschedules->count() }}x)
+                                                </span>
+                                            </button>
+                                        @endif
+                                        <button type="button" class="btn btn-link p-0 text-decoration-none text-muted" data-bs-toggle="modal" data-bs-target="#modalNewReschedule-{{ $publication->id }}" title="Catat Perubahan Jadwal Resmi (Reschedule)">
+                                            <i class="bi bi-pencil-square" style="font-size: 11px;"></i>
+                                        </button>
+                                    </div>
                                 </td>
                                 <td>
                                     {!! $formatDateStack($publication->jadwal_rilis) !!}
@@ -265,4 +278,166 @@
             </div>
         </div>
     </div>
+
+    <!-- MODAL RIWAYAT RESCHEDULE & MODAL INPUT RESCHEDULE BARU -->
+    @foreach($publications as $publication)
+        <!-- 1. Modal Riwayat Reschedule -->
+        @if($publication->has_reschedule)
+            <div class="modal fade" id="modalRescheduleHistory-{{ $publication->id }}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header bg-light">
+                            <div>
+                                <h5 class="modal-title fw-bold"><i class="bi bi-clock-history text-warning me-2"></i>Riwayat Perubahan Jadwal (Reschedule)</h5>
+                                <small class="text-muted">{{ $publication->nama_publikasi }} ({{ $publication->kategori }})</small>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th style="width: 40px;" class="text-center">No</th>
+                                            <th style="width: 120px;">Tindakan</th>
+                                            <th>Jadwal Semula &rarr; Baru</th>
+                                            <th>Surat Keterangan</th>
+                                            <th>Alasan Perubahan</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($publication->scheduleReschedules->sortByDesc('created_at') as $idx => $resched)
+                                            <tr>
+                                                <td class="text-center text-muted">{{ $idx + 1 }}</td>
+                                                <td>
+                                                    <span class="badge {{ $resched->action_badge_class }}">
+                                                        {{ $resched->action_label }}
+                                                    </span>
+                                                    <span class="d-block small text-muted mt-1">
+                                                        {{ $resched->created_at->format('d/m/Y H:i') }}
+                                                    </span>
+                                                </td>
+                                                <td class="small">
+                                                    @if($resched->action_type === 'dibatalkan')
+                                                        <span class="text-danger fw-bold"><i class="bi bi-x-circle me-1"></i>Publikasi Dibatalkan</span>
+                                                    @else
+                                                        <div><strong>Rilis:</strong> <del class="text-muted">{{ $resched->jadwal_rilis_semula ? $resched->jadwal_rilis_semula->format('d/m/Y') : '-' }}</del> &rarr; <span class="fw-bold text-primary">{{ $resched->jadwal_rilis_baru ? $resched->jadwal_rilis_baru->format('d/m/Y') : '-' }}</span></div>
+                                                        <div><strong>Upload:</strong> <del class="text-muted">{{ $resched->jadwal_upload_semula ? $resched->jadwal_upload_semula->format('d/m/Y') : '-' }}</del> &rarr; {{ $resched->jadwal_upload_baru ? $resched->jadwal_upload_baru->format('d/m/Y') : '-' }}</div>
+                                                        <div><strong>Pemeriksaan:</strong> <del class="text-muted">{{ $resched->jadwal_mulai_pemeriksaan_semula ? $resched->jadwal_mulai_pemeriksaan_semula->format('d/m/Y') : '-' }}</del> &rarr; {{ $resched->jadwal_mulai_pemeriksaan_baru ? $resched->jadwal_mulai_pemeriksaan_baru->format('d/m/Y') : '-' }}</div>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    <span class="fw-semibold small d-block">{{ $resched->letter_number }}</span>
+                                                    @if($resched->letter_file_path)
+                                                        <a href="{{ route('tenant.publications.reschedule.download-letter', $resched) }}" class="btn btn-sm btn-outline-danger py-0 px-2 mt-1">
+                                                            <i class="bi bi-file-earmark-pdf me-1"></i>Unduh Surat PDF
+                                                        </a>
+                                                    @endif
+                                                </td>
+                                                <td class="small text-muted">
+                                                    {{ $resched->reason }}
+                                                    <span class="d-block small text-secondary mt-1">Oleh: {{ $resched->user->name ?? 'Admin' }}</span>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Tutup</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        <!-- 2. Modal Form Input Reschedule Baru -->
+        <div class="modal fade" id="modalNewReschedule-{{ $publication->id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <form action="{{ route('tenant.publications.reschedule.store', $publication) }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-content">
+                        <div class="modal-header bg-warning-subtle text-warning-emphasis">
+                            <div>
+                                <h5 class="modal-title fw-bold"><i class="bi bi-calendar2-event me-2"></i>Penyesuaian Jadwal Rilis (Reschedule Resmi)</h5>
+                                <small>Publikasi: <strong>{{ $publication->nama_publikasi }}</strong> ({{ $publication->kategori }})</small>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="alert alert-info py-2 small mb-3">
+                                <i class="bi bi-info-circle-fill me-1"></i>
+                                <strong>Kebijakan Rilis Daerah:</strong> Seluruh publikasi (baik ARC maupun Non-ARC) yang telah ditetapkan pada jadwal rilis tahun berjalan memerlukan <strong>Surat Keterangan / Berita Acara resmi</strong> yang ditandatangani untuk setiap perubahan tanggal.
+                            </div>
+
+                            <!-- Pilihan Jenis Tindakan -->
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Jenis Tindakan Perubahan</label>
+                                <select name="action_type" class="form-select" id="actionTypeSelect-{{ $publication->id }}">
+                                    <option value="diundur">Diundur (Jadwal Mundur)</option>
+                                    <option value="dimajukan">Dimajukan (Jadwal Lebih Awal)</option>
+                                    <option value="dibatalkan">Dibatalkan (Rilis Publikasi Dibatalkan)</option>
+                                </select>
+                            </div>
+
+                            <!-- Jadwal Baru -->
+                            <div class="p-3 border rounded bg-light mb-3">
+                                <div class="row g-2">
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-bold">Jadwal Rilis Baru <span class="text-danger">*</span></label>
+                                        <input type="date" name="jadwal_rilis_baru" class="form-control form-control-sm" value="{{ $publication->jadwal_rilis ? $publication->jadwal_rilis->format('Y-m-d') : '' }}">
+                                        <span class="small text-muted">Jadwal semula: {{ $publication->jadwal_rilis ? $publication->jadwal_rilis->format('d/m/Y') : '-' }}</span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-bold">Jadwal Upload Baru <span class="text-danger">*</span></label>
+                                        <input type="date" name="jadwal_upload_baru" class="form-control form-control-sm" value="{{ $publication->jadwal_upload ? $publication->jadwal_upload->format('Y-m-d') : '' }}">
+                                        <span class="small text-muted">H-3 kerja sebelum rilis</span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-bold">Jadwal Mulai Pemeriksaan Baru <span class="text-danger">*</span></label>
+                                        <input type="date" name="jadwal_mulai_pemeriksaan_baru" class="form-control form-control-sm" value="{{ $publication->jadwal_mulai_pemeriksaan ? $publication->jadwal_mulai_pemeriksaan->format('Y-m-d') : '' }}">
+                                        <span class="small text-muted">H-5 kerja sebelum upload</span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-bold">Jadwal Mulai Penyusunan Baru <span class="text-danger">*</span></label>
+                                        <input type="date" name="jadwal_mulai_penyusunan_baru" class="form-control form-control-sm" value="{{ $publication->jadwal_mulai_penyusunan ? $publication->jadwal_mulai_penyusunan->format('Y-m-d') : '' }}">
+                                        <span class="small text-muted">H-1 kerja sebelum pemeriksaan</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Kelengkapan Surat Keterangan / Berita Acara -->
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <label class="form-label fw-bold mb-0">Nomor Surat Keterangan / Berita Acara <span class="text-danger">*</span></label>
+                                    <a href="{{ route('tenant.publications.reschedule.draft-surat', $publication) }}" target="_blank" class="btn btn-link btn-sm p-0 text-decoration-none">
+                                        <i class="bi bi-printer me-1"></i>Otomatisasi Draf Surat Keterangan
+                                    </a>
+                                </div>
+                                <input type="text" name="letter_number" class="form-control" placeholder="Contoh: B-120/1900/VS.100/2026" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Upload Surat Keterangan (PDF Bertandatangan) <span class="text-danger">*</span></label>
+                                <input type="file" name="letter_file" class="form-control" accept="application/pdf" required>
+                                <small class="text-muted">Format PDF, maksimal 10 MB.</small>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Alasan Penyesuaian Jadwal <span class="text-danger">*</span></label>
+                                <textarea name="reason" class="form-control" rows="2" placeholder="Jelaskan alasan pemajuan/pengunduran/pembatalan jadwal rilis ini..." required></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-warning" onclick="return confirm('Simpan perubahan jadwal resmi ini?')">
+                                <i class="bi bi-check-circle me-1"></i>Simpan Perubahan Jadwal Resmi
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    @endforeach
 @endsection

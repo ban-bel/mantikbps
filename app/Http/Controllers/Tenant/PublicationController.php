@@ -303,13 +303,16 @@ class PublicationController extends Controller
 
     protected function rules(?Publication $publication = null): array
     {
+        $targetYear = request()->input('tahun')
+            ?: (request()->filled('jadwal_rilis') ? Carbon::parse(request()->input('jadwal_rilis'))->year : ($publication?->tahun ?? now()->year));
+
         return [
             'nama_publikasi' => [
                 'required',
                 'string',
                 'max:255',
                 Rule::unique('publications', 'nama_publikasi')
-                    ->where(fn ($query) => $query->where('tenant_id', Auth::user()->tenant_id))
+                    ->where(fn ($query) => $query->where('tenant_id', Auth::user()->tenant_id)->where('tahun', $targetYear))
                     ->ignore($publication?->id),
             ],
             'estimasi_nomor_publikasi' => ['nullable', 'string', 'max:100'],

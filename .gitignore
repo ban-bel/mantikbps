@@ -24,22 +24,3 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
-
-# Kredensial cPanel (WAJIB di-ignore)
-.env.cpanel
-
-# Cache & runtime lokal Laravel
-/bootstrap/cache/*.php
-/storage/framework/cache/data/*
-/storage/framework/sessions/*
-/storage/framework/views/*
-/storage/logs/*
-/storage/app/public/*
-
-# File skrip pengecekan sementara di root (opsional)
-/compare_manifests.php
-/hash_compare.php
-/make_manifest_local.php
-/make_manifest_server.sh
-/manifest_local.txt
-/route_probe.php
